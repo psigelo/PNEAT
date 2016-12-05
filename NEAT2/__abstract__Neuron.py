@@ -1,6 +1,6 @@
 import random
 
-class Neuron :
+class __abstract__Neuron :
 	''' Neuron es una clase abstracta que representa una neurona. '''
 	def __init__(self):
 		super().__init__()

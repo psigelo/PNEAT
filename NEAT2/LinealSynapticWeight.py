@@ -1,9 +1,9 @@
-from .SynapticWeight import SynapticWeight
+from .__abstract__SynapticWeight import __abstract__SynapticWeight
 from .Parameter import Parameter
 import copy
 import random
 
-class LinealSynapticWeight (SynapticWeight):
+class LinealSynapticWeight (__abstract__SynapticWeight):
 	def __init__(self, other=None):
 		super().__init__()
 		if(other == None):

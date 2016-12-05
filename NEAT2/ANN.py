@@ -2,36 +2,38 @@ from .Layer import Layer
 from .SynapticWeightMark import SynapticWeightMark
 from .Neuron import Neuron
 import copy
+import random
 
-lastLayerId = 1000
+lastLayerId = 10000
+
+def layerComparison(layer):
+	return layer.layerId
 
 class ANN :
 	def __init__(self, neuronOrOtherANN, synapticWeight=None, inputAmount=None, outputAmount=None):
-		if( synapticWeight == None ): # en este caso suponemos que neuronOrOtherANN es una ANN.
+		if( synapticWeight is None ): # en este caso suponemos que neuronOrOtherANN es una ANN.
 			self.inputAmount = neuronOrOtherANN.inputAmount
 			self.outputAmount = neuronOrOtherANN.outputAmount
 			self.probabilityNewNeuronInLayer = neuronOrOtherANN.probabilityNewNeuronInLayer
 			self.probabilityOfNewSynapticWeight = neuronOrOtherANN.probabilityOfNewSynapticWeight
 			self.probabilityOfNewUniqueSynapticWeight = neuronOrOtherANN.probabilityOfNewUniqueSynapticWeight
 			self.probabilityOfNewLayer = neuronOrOtherANN.probabilityOfNewLayer
-			self.inputsAmount = neuronOrOtherANN.inputsAmount
-			self.outputsAmount = neuronOrOtherANN.outputsAmount
-			self.useBackwardConnections = neuronOrOtherANN.useBackwardConnections
 			self.layer_list = copy.deepcopy(neuronOrOtherANN.layer_list)
 			self.synapticWeight_list = copy.deepcopy(neuronOrOtherANN.synapticWeight_list)
+			self.innovation = '' # No debe ser igual que la copia, este valor solo debe ser asignado en caso de que sea una ANN con innovaciones de topologia.
 		else: # en este caso neuronOrOtherANN es Neurona
 			self.inputAmount = inputAmount
 			self.outputAmount = outputAmount
-			self.probabilityNewNeuronInLayer = 1.0
-			self.probabilityOfNewSynapticWeight = 1.0
-			self.probabilityOfNewUniqueSynapticWeight = 0.0
-			self.probabilityOfNewLayer = 1.0
-			self.inputsAmount = 2
-			self.outputsAmount = 2
-			self.useBackwardConnections = True
+			self.probabilityNewNeuronInLayer = 0.1
+			self.probabilityOfNewSynapticWeight = 0.1
+			self.probabilityOfNewUniqueSynapticWeight = 0.1
+			self.probabilityOfNewLayer = 0.1
+			self.useBackwardConnections = False
 			self.layer_list = []
 			self.synapticWeight_list = []
+			self.innovation=''
 			self.CreateInitialStructure(neuronOrOtherANN, synapticWeight)
+		
 
 	def CreateInitialStructure(self, neuron, synapticWeight):
 		#Creando la capa de entrada
@@ -84,6 +86,111 @@ class ANN :
 			print("ERROR::ANN::SetInputs::InputVoltageList have a diferent size than the ANN inputs neurons. ")
 			exit()
 
+	def MightMutate(self):
+		self.MightMutation_NonTopology()
+		self.MightMutate_Topology()
 
-	# def MightMutate(self):
+	def MightMutation_NonTopology(self):
+		for layer in self.layer_list:
+			layer.MightMutate_NonTopology()
+		for synapticWeight in self.synapticWeight_list:
+			synapticWeight.MightMutate()
+
+	def MightMutation_NonTopology(self):
+		if( random.random() < self.probabilityOfNewLayer ):
+			self.NewLayer()
+
+		if( random.random() < self.probabilityOfNewSynapticWeight ):
+			if (random.random() < probabilityOfNewUniqueSynapticWeight):
+				self.CreateNewUniqueSynapticWeight()
+			elif(random.random() < probabilityOfNewSynapticWeight)
+				self.CreateNewSynapticWeight()
+
+		if( random.random() < self.probabilityNewNeuronInLayer ):
+			print("hola")
+		if( random.random() < self.probabilityOfNewUniqueSynapticWeight ):
+			print("hola")
+
+	def FindRandomNeuronFromLayerBehindAt( self, layerBound ):
+		assert layerBound != lastLayerId, "Error::ANN::FindRandomNeuronFromLayerBehindAt::layerBound is lastLayerId and not layer place."
+		assert layerBound == 0, "Error::ANN::FindRandomNeuronFromLayerBehindAt::layerBound is 0"
+		randomLayerPlace = random.randint(0, layerBound-1)
+		randomNeuronPlace = random.randint(0, len(self.layer_list[randomLayerPlace].neuron_list)-1 )
+		return {'randomLayerPlace': randomLayerPlace, 'randomNeuronPlace': randomNeuronPlace } 
+
+	def FindRandomNeuronFromLayerAheadAt( self, layerBound ):
+		assert layerBound != lastLayerId, "Error::ANN::FindRandomNeuronFromLayerBehindAt::layerBound is lastLayerId and not layer place."
+		assert layerBound == len(self.layer_list[randomLayerPlace].neuron_list)-1, "Error::ANN::FindRandomNeuronFromLayerBehindAt::layerBound is the last layer"
+		randomLayerPlace = random.randint(layerBound+1, len(self.layer_list[randomLayerPlace].neuron_list)-1)
+		randomNeuronPlace = random.randint(0, len(self.layer_list[randomLayerPlace].neuron_list)-1 )
+		return {'layer': randomLayerPlace, 'neuron': randomNeuronPlace } 
+
+	def FindRandomNeuron(self):
+		randomLayerPlace = random.randint(0, len(self.layer_list)-1)
+		randomNeuronPlace = random.randint(0, len(self.layer_list[randomLayerPlace].neuron_list)-1 )
+		return {'layer': randomLayerPlace, 'neuron': randomNeuronPlace } 
+
+	def NewLayer(self):
+		self.NewLayer()
+		newLayerId = len(self.layer_list)-1
+		layer_new = Layer(newLayerId, self.layer_list[0].neuron_list[0] )
+		self.layer_list.append(layer_new)
+		sorted(self.layer_list, key=layerComparison )
+		
+		neuronIn, neuronOut = self.FindNeuronInputAndOutputOfNewLayer(newLayerId)		
+		self.CreateAndConnectANewSynapticWeight( layerInitialIn=neuronIn['layer'], neuronInitialIn=neuronIn['neuron'], layerInitialOut=newLayerId, neuronInitialOut=0 )
+		self.CreateAndConnectANewSynapticWeight( layerInitialIn=newLayerId, neuronInitialIn=0, layerInitialOut=neuronOut['layer'], neuronInitialOut=neuronOut['neuron'] )
+
+	def FindNeuronInputAndOutputOfNewLayer(self, newLayerId):
+		if( useBackwardConnections ):
+			nonlocal neuronIn
+			nonlocal neuronOut
+			neuronIn = self.FindRandomNeuron()
+			neuronOut = self.FindRandomNeuron()				
+		else:
+			nonlocal neuronIn
+			nonlocal neuronOut
+			neuronIn = FindRandomNeuronFromLayerBehindAt(newLayerId) #newLayerId es igual a la posicion en el layer
+			neuronOut = FindRandomNeuronFromLayerAheadAt(newLayerId)
+		return neuronIn, neuronOut
+
+	def CreateAndConnectANewSynapticWeight(self,layerInitialIn, neuronInitialIn, layerInitialOut, neuronInitialOut ):
+		new_synapicWeight = synapticWeight_list.CreateNew()
+		new_synapicWeight.SetMark(layerInitialIn=layerInitialIn, neuronInitialIn=neuronInitialIn, layerInitialOut=layerInitialOut, neuronInitialOut=neuronInitialOut)
+		self.synapticWeight_list.append(new_synapicWeight)
+		self.layer_list[layerInitialIn].neuron_list[neuronInitialIn].AddOutwardConnection(new_synapicWeight)
+		self.layer_list[layerInitialOut].neuron_list[neuronInitialOut].AddInwardConnection(new_synapicWeight)
+
+	def CreateNewUniqueSynapticWeight(self):
+		attempts = 5
+		for it in range(0,attempts):
+			if(useBackwardConnections):
+				nonlocal neuronIn 
+				nonlocal neuronOut
+				neuronOut = self.FindRandomNeuron()
+				neuronIn  = self.FindRandomNeuron()
+			else:
+				nonlocal neuronIn 
+				nonlocal neuronOut
+				neuronIn = self.FindRandomNeuron()
+				neuronOut = self.FindRandomNeuronFromLayerAheadAt(neuronIn['layer'])
+
+			
+
+			break
+
+	def CreateNewSynapticWeight(self):
+		#First at all is find the input and output Neurons
+		if(useBackwardConnections):
+			nonlocal neuronIn 
+			nonlocal neuronOut
+			neuronOut = self.FindRandomNeuron()
+			neuronIn  = self.FindRandomNeuron()
+		else:
+			nonlocal neuronIn 
+			nonlocal neuronOut
+			neuronIn = self.FindRandomNeuron()
+			neuronOut = self.FindRandomNeuronFromLayerAheadAt(neuronIn['layer'])
+
+		CreateAndConnectANewSynapticWeight(layerInitialIn=neuronIn['layer'], neuronInitialIn=neuronIn['neuron'], layerInitialOut=neuronOut['layer'], neuronInitialOut=neuronIn['neuron'])
 

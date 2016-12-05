@@ -1,4 +1,4 @@
-class SynapticWeight:
+class __abstract__SynapticWeight:
 	''' SynapticWright es una clase abstracta (en terminos de c++) la cual '''
 	def __init__(self, mark = None):
 		self.output = 0.0
@@ -8,6 +8,9 @@ class SynapticWeight:
 
 	def SetMark(self, mark):
 		self.mark = mark
+
+	def GetMark(self):
+		return self.mark
 
 	def GetOutput(self):
 		return self.output

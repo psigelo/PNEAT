@@ -1,4 +1,4 @@
-from .Neuron import Neuron
+from .__abstract__Neuron import __abstract__Neuron
 from .Parameter import Parameter
 import math
 import copy
@@ -8,9 +8,9 @@ def Sigmoid(x):
 	return  1.0 / (1.0 + math.exp(-x))
 
 
-class SigmoidNeuron (Neuron): 
+class SigmoidNeuron (__abstract__Neuron): 
 	''' Representa neuronas basicas tipo sigmoidales. '''
-	def __init__(self, other = None ):
+	def __init__(self, other=None ):
 		super().__init__()
 		if ( other == None ) :
 			self.constantDistanceOfBias = float (0.2)

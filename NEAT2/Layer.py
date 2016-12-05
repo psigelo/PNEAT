@@ -7,7 +7,7 @@ class Layer:
 	def AddNeuron(self, neuron):
 		self.neuron_list.append(neuron)
 
-	def MightMutate(self):
+	def MightMutate_NonTopology(self):
 		for neuron in self.neuron_list:
 			neuron.MightMutate()
 
